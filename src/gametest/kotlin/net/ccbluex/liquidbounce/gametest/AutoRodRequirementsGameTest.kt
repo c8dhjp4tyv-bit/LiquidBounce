@@ -20,7 +20,6 @@ package net.ccbluex.liquidbounce.gametest
 
 import com.google.gson.Gson
 import com.google.gson.JsonArray
-import com.google.gson.JsonParser
 import net.ccbluex.liquidbounce.config.ConfigSystem
 import net.ccbluex.liquidbounce.event.EventManager
 import net.ccbluex.liquidbounce.event.events.GameTickEvent
@@ -112,14 +111,14 @@ class AutoRodRequirementsGameTest : FabricClientGameTest {
     private fun assertConfiguredGuards() {
         val player = checkNotNull(mc.player)
         val requires = ModuleAutoRod.settings.getValue("Requires")
-        requires.deserializeFrom(Gson(), JsonParser.parseString("["Weapon"]"))
+        requires.deserializeFrom(Gson(), JsonArray().apply { add("Weapon") })
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack(Items.STONE))
         assertAllowed(false, "the configured Weapon requirement")
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack(Items.DIAMOND_SWORD))
         requires.deserializeFrom(Gson(), JsonArray())
 
         val ignores = ModuleAutoRod.settings.getValue("Ignore")
-        ignores.deserializeFrom(Gson(), JsonParser.parseString("["HoldingConsumable"]"))
+        ignores.deserializeFrom(Gson(), JsonArray().apply { add("HoldingConsumable") })
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack(Items.APPLE))
         assertAllowed(false, "the configured HoldingConsumable ignore")
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack(Items.DIAMOND_SWORD))

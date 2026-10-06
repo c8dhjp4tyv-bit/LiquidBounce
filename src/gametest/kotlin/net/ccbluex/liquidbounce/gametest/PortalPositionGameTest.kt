@@ -71,22 +71,33 @@ class PortalPositionGameTest : FabricClientGameTest {
                     }
                 }
 
-                context.onClient {
-                    fillSurroundings(Blocks.AIR.defaultBlockState())
-                    ModuleAutoBuild.enabled = true
-                    check(ModuleAutoBuild.enabled) { "A valid portal site could not be enabled" }
-                    check(!ModuleAutoBuild.placer.isDone()) { "A valid site did not queue frame blocks" }
-                    check(ModuleAutoBuild.placer.support.blockedPositions.size == 6)
-                    ModuleAutoBuild.enabled = false
-                    check(ModuleAutoBuild.placer.isDone())
-                    check(ModuleAutoBuild.placer.support.blockedPositions.isEmpty())
-                }
+                assertImmediateRetry(context)
             }
         } finally {
             context.onClient {
                 ModuleAutoBuild.enabled = false
                 ConfigSystem.deserializeValueGroup(ModuleAutoBuild, saved)
             }
+        }
+    }
+
+    private fun assertImmediateRetry(context: ClientGameTestContext) {
+        context.onClient {
+            // Leave an invalid attempt's disable queued, then immediately start a valid attempt.
+            ModuleAutoBuild.enabled = true
+            ModuleAutoBuild.enabled = false
+            fillSurroundings(Blocks.AIR.defaultBlockState())
+            ModuleAutoBuild.enabled = true
+            check(ModuleAutoBuild.enabled) { "A valid portal site could not be enabled" }
+            check(!ModuleAutoBuild.placer.isDone()) { "A valid site did not queue frame blocks" }
+            check(ModuleAutoBuild.placer.support.blockedPositions.size == 6)
+        }
+        context.waitTicks(1)
+        context.onClient {
+            check(ModuleAutoBuild.enabled) { "An old invalid attempt disabled the valid retry" }
+            ModuleAutoBuild.enabled = false
+            check(ModuleAutoBuild.placer.isDone())
+            check(ModuleAutoBuild.placer.support.blockedPositions.isEmpty())
         }
     }
 
