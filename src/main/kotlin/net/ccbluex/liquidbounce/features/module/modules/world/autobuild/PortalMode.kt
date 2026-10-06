@@ -40,13 +40,17 @@ object PortalMode : ModuleAutoBuild.AutoBuildMode("Portal") {
     override fun enabled() {
         phase = Phase.BUILD
         val portal = getPortal()
+        this.portal = portal
         if (portal == null) {
             chat(markAsError(ModuleAutoBuild.message("noPosition")), ModuleAutoBuild)
             // The enabled value is committed after onEnabled returns, so defer the disable.
-            mc.schedule { ModuleAutoBuild.enabled = false }
+            mc.schedule {
+                if (parent.activeMode === this && this.portal == null) {
+                    ModuleAutoBuild.enabled = false
+                }
+            }
             return
         }
-        this.portal = portal
         placer.update(portal.frameBlocks.filter { it.stateOrEmpty.block !== Blocks.OBSIDIAN })
         placer.support.blockedPositions.addAll(portal.enclosedBlocks)
     }

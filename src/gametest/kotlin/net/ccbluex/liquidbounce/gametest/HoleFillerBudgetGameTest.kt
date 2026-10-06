@@ -19,7 +19,7 @@
 package net.ccbluex.liquidbounce.gametest
 
 import com.google.gson.Gson
-import com.google.gson.JsonParser
+import com.google.gson.JsonArray
 import net.ccbluex.liquidbounce.config.ConfigSystem
 import net.ccbluex.liquidbounce.features.module.modules.world.ModuleHoleFiller
 import net.ccbluex.liquidbounce.utils.block.hole.Hole
@@ -31,7 +31,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityTypes
-import net.minecraft.world.entity.monster.Slime
+import net.minecraft.world.entity.monster.cubemob.Slime
 import net.minecraft.world.level.levelgen.structure.BoundingBox
 
 /** Exercises the smart collector with two targets competing for one hotbar budget. */
@@ -54,7 +54,7 @@ class HoleFillerBudgetGameTest : FabricClientGameTest {
                 context.onClient {
                     ModuleHoleFiller.enabled = false
                     ModuleHoleFiller.settings.getValue("Features").deserializeFrom(
-                        Gson(), JsonParser.parseString("["Smart"]")
+                        Gson(), JsonArray().apply { add("Smart") }
                     )
                     val player = checkNotNull(mc.player)
                     val base = player.blockPosition()
