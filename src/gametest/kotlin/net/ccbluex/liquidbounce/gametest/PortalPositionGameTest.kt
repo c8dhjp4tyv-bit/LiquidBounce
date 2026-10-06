@@ -31,6 +31,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.state.BlockState
 
 /** Rejects obstructed portal sites, then exercises a successful enable and teardown. */
 class PortalPositionGameTest : FabricClientGameTest {
@@ -89,7 +90,7 @@ class PortalPositionGameTest : FabricClientGameTest {
         }
     }
 
-    private fun fillSurroundings(state: net.minecraft.world.level.block.state.BlockState) {
+    private fun fillSurroundings(state: BlockState) {
         val level = checkNotNull(mc.level)
         val center = checkNotNull(mc.player).blockPosition()
         for (pos in BlockPos.betweenClosed(center.offset(-3, -1, -3), center.offset(3, 4, 3))) {
