@@ -45,9 +45,9 @@ class TeleportDisconnectGameTest : FabricClientGameTest {
             check(context.fromClient { !ModuleTeleport.enabled }) { "A pending teleport survived disconnect" }
 
             context.worldBuilder().create().use { world ->
-                world.server.runCommand("tp @a 8 ~ 8")
+                world.server.runCommand("tp @a 8.0 ~ 8.0")
                 context.waitFor({ client -> client.player?.let { it.x == 8.0 && it.z == 8.0 } == true }, 200)
-                world.server.runCommand("tp @a 9 ~ 9")
+                world.server.runCommand("tp @a 9.0 ~ 9.0")
                 context.waitFor({ client -> client.player?.let { it.x == 9.0 && it.z == 9.0 } == true }, 200)
                 check(context.fromClient { !ModuleTeleport.enabled }) { "Joining reactivated the old teleport" }
 
@@ -57,11 +57,13 @@ class TeleportDisconnectGameTest : FabricClientGameTest {
                     ModuleTeleport.indicateTeleport(12.0, player.y, 12.0)
                     check(ModuleTeleport.enabled)
                 }
-                world.server.runCommand("tp @a 10 ~ 10")
+                world.server.runCommand("tp @a 10.0 ~ 10.0")
                 context.waitFor({ client -> client.player?.let { it.x == 10.0 && it.z == 10.0 } == true }, 200)
                 check(context.fromClient { ModuleTeleport.enabled }) { "The request completed before both corrections" }
-                world.server.runCommand("tp @a 11 ~ 11")
-                context.waitFor({ !ModuleTeleport.enabled }, 200)
+                world.server.runCommand("tp @a 11.0 ~ 11.0")
+                context.waitFor({ client ->
+                    !ModuleTeleport.enabled && client.player?.let { it.x == 12.0 && it.z == 12.0 } == true
+                }, 200)
             }
         } finally {
             context.onClient {
