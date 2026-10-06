@@ -224,7 +224,7 @@ object ModuleHoleFiller : ClientModule("HoleFiller", ModuleCategories.WORLD), Ho
             }
         }
 
-        return remainingItems
+        return remainingItems1
     }
 
     private fun isValidHole(
