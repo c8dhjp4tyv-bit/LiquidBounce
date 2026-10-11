@@ -1,0 +1,65 @@
+name: Verify contributions
+
+on:
+  push:
+    branches: [ci/verify-liquidbounce-contributions-20261011]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src-theme/package-lock.json
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Build and test
+        env:
+          CI: true
+        run: ./gradlew build
+      - name: Bind lifecycle regressions
+        run: node --test src-theme/tests/bind-lifecycle.test.mjs
+
+  gametest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src-theme/package-lock.json
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Install EGL
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libegl-mesa0
+      - name: Library versions
+        id: libraries
+        run: echo "key=$(grep -E '^(liquidbounce-cef|djl) *=' gradle/libs.versions.toml | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        with:
+          path: ~/.gradle/liquidbounce-gametest
+          key: gametest-libraries-${{ runner.os }}-${{ steps.libraries.outputs.key }}
+      - name: Client game tests
+        env:
+          CI: true
+          SDL_VIDEO_FORCE_EGL: 1
+        run: xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGameTest
